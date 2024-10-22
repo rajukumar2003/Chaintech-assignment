@@ -1,24 +1,24 @@
 import { useState } from 'react'
-import { toast, Toaster } from 'sonner'
 import { Link, useNavigate } from 'react-router-dom'
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import { toast, Toaster } from 'sonner'
 import { auth } from '../firebaseConfig'
-
+import { signInWithEmailAndPassword } from 'firebase/auth'
 
 export default function LoginForm() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         try {
+            // Login user using email and password
             const userCredential = await signInWithEmailAndPassword(auth, email, password)
             const user = userCredential.user
             console.log('User logged in:', user)
             toast.success('Login successful 🎉')
             navigate('/dashboard')
-        } catch (error) {
+        } catch (error: any) {
             console.error('Login failed:', error.message)
             toast.error(error.message)
             return

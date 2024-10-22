@@ -6,26 +6,37 @@ import { auth, db } from '../firebaseConfig'
 import { useNavigate } from 'react-router-dom'
 import { doc, getDoc } from 'firebase/firestore'
 
-export default function Dashboard({ userId }) {
+interface DashboardProps {
+    userId: string;
+}
+
+interface UserData {
+    name: string;
+    email: string;
+    phoneNumber: string;
+}
+
+export default function Dashboard({ userId }: DashboardProps) {
     const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
-    const [userData, setUserData] = useState({ name: 'User', email: '', phoneNumber: '' })
+    const [userData, setUserData] = useState < UserData > ({ name: 'User', email: '', phoneNumber: '' })
     const navigate = useNavigate()
 
     useEffect(() => {
         // Fetch user data from Firestore
         const fetchUserData = async () => {
             try {
+                // Fetch user data from Firestore
                 const userDocRef = doc(db, 'users', userId)
                 const userDoc = await getDoc(userDocRef)
                 if (userDoc.exists()) {
-                    setUserData(userDoc.data())
+                    setUserData(userDoc.data() as UserData)
                 } else {
                     console.log('No such document!')
                     toast.error('User data not found')
                 }
             } catch (error) {
                 console.error('Error fetching user data:', error)
-                toast.error('Failed to fetch user data')
+                toast.error(`Failed to fetch user data ${error}`)
             }
         }
 
@@ -34,13 +45,11 @@ export default function Dashboard({ userId }) {
         }
     }, [userId]);
 
-
-    const handleProfileUpdate = (updatedName, updatedPhone) => {
-        setUserData({ ...userData, name: updatedName, phoneNumber: updatedPhone })
+    const handleProfileUpdate = (updatedName: string, updatedPhone: string) => {
+        setUserData({ ...userData, name: updatedName, phoneNumber: updatedPhone });
         setIsEditProfileOpen(false);
     }
-
-
+    // Logout user
     const handleLogout = async () => {
         await signOut(auth)
         toast.success('Logged out successfully')

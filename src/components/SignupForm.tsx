@@ -14,11 +14,32 @@ export default function SignupForm() {
     const [isLoading, setIsLoading] = useState(false)
     const navigate = useNavigate()
 
-
-    const handleSubmit = async(e) => {
+    
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsLoading(true)
+
         // Basic client-side validation
+        if (!name.trim()) {
+            toast.error('Name is required')
+            setIsLoading(false)
+            return
+        }
+        //Email Validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(email)) {
+            toast.error('Invalid email format')
+            setIsLoading(false)
+            return
+        }
+        // Phone Number Validation
+        const phoneRegex = /^\d{10}$/
+        if (!phoneRegex.test(phoneNumber)) {
+            toast.error('Phone number must be 10 digits')
+            setIsLoading(false)
+            return
+        }
+        // Passwords must match
         if (password !== confirmPassword) {
             toast.error('Passwords do not match')
             setIsLoading(false)
@@ -30,12 +51,13 @@ export default function SignupForm() {
             setIsLoading(false)
             return
         }
-        // Create user
+
+        // Creating user
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password)
             const user = userCredential.user
 
-            // Save user details to Firestore
+            // Saving user details to Firestore
             await setDoc(doc(db, 'users', user.uid), {
                 name,
                 email,
@@ -45,14 +67,13 @@ export default function SignupForm() {
             console.log('User registered:', user)
             toast.success('Registration successful 🎉')
             navigate('/dashboard')
-        }catch(error) {
+        } catch (error: any) {
             console.error('Registration failed:', error.message)
             toast.error(error.message)
             return
         } finally {
             setIsLoading(false)
         }
-
     }
 
     return (
@@ -132,7 +153,7 @@ export default function SignupForm() {
                         </button>
                     </div>
                 </form>
-
+                
                 <div className="text-sm text-center">
                     Already have an account?{' '}
                     <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">

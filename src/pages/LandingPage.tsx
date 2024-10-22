@@ -1,14 +1,13 @@
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
 
-
 export default function LandingPage() {
     const navigate = useNavigate();
-
+    // Redirect to login page
     const handleLoginClick = () => {
         navigate('/login')
     }
-
+    // Redirect to signup page
     const handleSignupClick = () => {
         navigate('/signup')
     }

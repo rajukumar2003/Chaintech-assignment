@@ -1,16 +1,52 @@
+import { doc, updateDoc } from 'firebase/firestore';
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { db } from '../firebaseConfig';
 
-export default function EditProfileForm({ userId, initialName, onSave, initialPhoneNumber, onClose }) {
+interface EditProfileFormProps {
+    userId: string;
+    initialName: string;
+    initialPhoneNumber: string;
+    onSave: (name: string, phoneNumber: string) => void;
+    onClose: () => void;
+}
+
+export default function EditProfileForm({ userId, initialName, onSave, initialPhoneNumber, onClose }: EditProfileFormProps) {
     const [name, setName] = useState(initialName)
     const [phoneNumber, setPhoneNumber] = useState(initialPhoneNumber)
 
-    const handleSubmit = async(e) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        // Update user profile
-        onSave(name, phoneNumber);
-        toast.success('Profile updated successfully 🎉');
-        onClose();
+        // Name is required
+        if (!name.trim()) {
+            toast.error('Name is required')
+            return
+        }
+        // Phone number must be 10 digits
+        const phoneRegex = /^\d{10}$/
+        if (!phoneRegex.test(phoneNumber)) {
+            toast.error('Phone number must be 10 digits')
+            return
+        }
+
+        try {
+            // Reference to the Firestore document
+            const userDocRef = doc(db, 'users', userId)
+
+            // Updating the document with the new data
+            await updateDoc(userDocRef, {
+                name,
+                phoneNumber
+            })
+            // Calling the onSave callback to update the UI
+            onSave(name, phoneNumber);
+
+            toast.success('Profile updated successfully 🎉');
+            onClose()
+        } catch (error) {
+            console.error("Error updating profile:", error)
+            toast.error('Failed to update profile')
+        }
     }
 
     return (
